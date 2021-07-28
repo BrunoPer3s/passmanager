@@ -15,6 +15,7 @@ import {
   HeaderTitle,
   Form
 } from './styles';
+import { useAsyncStorage } from '../../hooks/useAsyncStorage';
 
 interface FormData {
   title: string;
@@ -40,6 +41,8 @@ export function RegisterLoginData() {
     resolver: yupResolver(schema)
   });
 
+  const { getItem, setItem } = useAsyncStorage();
+
   async function handleRegister(formData: FormData) {
     const newLoginData = {
       id: String(uuid.v4()),
@@ -49,15 +52,15 @@ export function RegisterLoginData() {
     const key = '@passmanager:logins';
 
     try {
-      const data = await AsyncStorage.getItem(key);
-      const storagedData = data ? JSON.parse(data): [];
+      const storagedData = await getItem();
 
       const newData = [
         ...storagedData,
         newLoginData
-      ]
+      ] as FormData[];
 
-      await AsyncStorage.setItem(key, JSON.stringify(newData));
+      setItem(newData);
+
       reset();
     } catch (err) {
       console.log(err);
